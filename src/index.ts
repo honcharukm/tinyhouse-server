@@ -2,16 +2,16 @@ import dotenv from 'dotenv'
 import express, { Application } from 'express'
 import { ApolloServer } from 'apollo-server-express'
 import { typeDefs, resolvers } from './graphql'
-import { database } from './mysql'
+import { db } from './mysql'
 
 dotenv.config()
 
-const mount = (app: Application): void => {
+const mount = async (app: Application) => {
     const server = new ApolloServer(
         { 
             typeDefs, 
             resolvers, 
-            context: () => ({ database }) 
+            context: () => ({ db }) 
         }
     )
     server.applyMiddleware({ app, path: '/' })

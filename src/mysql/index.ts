@@ -1,6 +1,6 @@
-import { listings } from './listings'
-import { IDataBase } from './types'
+import { listings, delete_listing } from './listings'
 
-export const database: IDataBase = {
-    listings: listings()
+export const db = {
+    listings,
+    delete_listing
 }

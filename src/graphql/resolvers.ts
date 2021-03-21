@@ -1,21 +1,22 @@
 import { IResolvers } from 'apollo-server-express'
-import { listings } from './../listings'
 
 export const resolvers: IResolvers = {
     Query: {
-        listings: async (_root, _arg, { database }) => {
-            return await database.listings
+        listings: async (
+            _root: undefined,
+            _arg: undefined, 
+            { db }
+        ) => {
+            return await db.listings()
         }
     },
     Mutation: {
-        deleteListing: (_: undefined, { id }: { id: string }) => {
-            for (let i = 0; i < listings.length; i++) {
-                if(listings[i].id === id) {
-                    return listings.splice(i, 1)[0]
-                }
-            }
-
-            throw new Error('Not found')
+        deleteListing: async (
+            _: undefined, 
+            { id }: { id: number }, 
+            { db }
+        ) => {
+            return await db.delete_listing(id)
         }
     }
 }

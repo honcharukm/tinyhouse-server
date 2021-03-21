@@ -1,7 +1,3 @@
-export interface IDataBase {
-    listings: Promise<IListing[]>
-}
-
 export interface IListing {
     id: number
     title: string

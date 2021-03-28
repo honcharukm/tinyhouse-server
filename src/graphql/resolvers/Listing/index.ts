@@ -1,6 +1,6 @@
 import { IResolvers } from 'apollo-server-express'
 
-export const resolvers: IResolvers = {
+export const listingResolver: IResolvers = {
     Query: {
         listings: async (
             _root: undefined,

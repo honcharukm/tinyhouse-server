@@ -1,22 +1,23 @@
 import { IResolvers } from 'apollo-server-express'
+import { IDatabase } from '../../../database/types'
 
 export const listingResolver: IResolvers = {
     Query: {
         listings: async (
             _root: undefined,
             _arg: undefined, 
-            { db }
+            { database }: { database: IDatabase}
         ) => {
-            return await db.listings()
+            return await database.listing.getListings()
         }
     },
     Mutation: {
         deleteListing: async (
             _: undefined, 
             { id }: { id: number }, 
-            { db }
+            { database }: { database: IDatabase }
         ) => {
-            return await db.delete_listing(id)
+            return await database.listing.deleteListing(id)
         }
     }
 }

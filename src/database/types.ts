@@ -5,10 +5,20 @@ type Collection<TData> = TData[] | RowDataPacket[]
 export type GetListings = () => Promise<Collection<IListing>>
 export type DeleteListing = (id: number) => Promise<OkPacket>
 
+export type GetUser = (id: string) => Promise<IUser | RowDataPacket>
+export type UpdateUser = <TField = {}>(id: string, fields: TField) => Promise<IUser | RowDataPacket | undefined>
+export type CreateUser = (fields: IUser) => Promise<IUser | RowDataPacket>
+export type GetUserById = (id: number) => Promise<IUser | RowDataPacket>
+
 export interface IDatabase {
     listing: { 
         getListings: GetListings
         deleteListing: DeleteListing
+    },
+    user: {
+        getUser: GetUser
+        updateUser: UpdateUser
+        createUser: CreateUser
     }
 }
 
@@ -47,15 +57,16 @@ export interface IListing {
 }
 
 export interface IUser {
-    id: number
+    id?: number
+    userId: string
     token: string
     name: string
     avatar: string
     contact: string
     walletId?: string
     income: number
-    bookings: number[]
-    listings: number[]
+    bookings: string
+    listings: string
 }
 
 export interface IBooking {

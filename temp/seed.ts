@@ -1,4 +1,4 @@
-import { Pool, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import { Pool, ResultSetHeader } from 'mysql2/promise';
 import { connect } from './../src/database/database.connect'
 import { ListingType } from '../src/database/types'
 
@@ -22,6 +22,7 @@ const tables: Table[] = [
         name: 'users',
         fields: [
             'id int AUTO_INCREMENT PRIMARY KEY',
+            'userId varchar(255)',
             'token varchar(255)',
             'name varchar(255)',
             'avatar varchar(255)',
@@ -39,7 +40,7 @@ const tables: Table[] = [
             'title varchar(255)',
             'description text',
             'image varchar(255)',
-            'host int',
+            'host varchar(255)',
             'type varchar(255)',
             'address varchar(255)',
             'country varchar(255)',
@@ -721,19 +722,9 @@ const listings = [
     }
   ];
 
-interface User {
-    token: string
-    name: string
-    avatar: string
-    contact: string
-    walletId: string
-    income: number
-    bookings: string[]
-    listings: string[]
-}
-
-const users: User[] = [
+  const users = [
     {
+      _id: "5d378db94e84753160e08b55",
       token: "token_************",
       name: "James J.",
       avatar:
@@ -749,6 +740,7 @@ const users: User[] = [
       ]
     },
     {
+      _id: "5d378db94e84753160e08b56",
       token: "token_************",
       name: "Elizabeth A.",
       avatar:
@@ -773,6 +765,7 @@ const users: User[] = [
       ]
     },
     {
+      _id: "5d378db94e84753160e08b57",
       token: "token_************",
       name: "Andrew D.",
       avatar:
@@ -795,6 +788,7 @@ const users: User[] = [
       ]
     },
     {
+      _id: "5d378db94e84753160e08b58",
       token: "token_************",
       name: "Danielle C.",
       avatar:
@@ -810,6 +804,7 @@ const users: User[] = [
       ]
     },
     {
+      _id: "5d378db94e84753160e08b59",
       token: "token_************",
       name: "Sarah K.",
       avatar:
@@ -830,7 +825,7 @@ const users: User[] = [
         "5d378db94e84753160e08b52"
       ]
     }
-  ];
+  ]
 
 const insertIntoTable = 
     async (
@@ -875,8 +870,9 @@ const seed = async (): Promise<void> => {
         
         compliteCreateTables.then(_ => {
             const compliteCreateUser = Promise.all(
-                users.map(async (user): Promise<[number, string[]]> => {
+                users.map(async (user): Promise<[number, string, string[]]> => {
                     const fields: string[] = [
+                        'userId',
                         'token', 
                         'name', 
                         'avatar', 
@@ -887,6 +883,7 @@ const seed = async (): Promise<void> => {
                         'listings'
                     ]
                     const values = [
+                        user._id,
                         user.token,
                         user.name,
                         user.avatar,
@@ -897,13 +894,13 @@ const seed = async (): Promise<void> => {
                         JSON.stringify([])
                     ]
                     const result = await insertIntoTable(db, 'users', fields, values)
-                    return [ result.insertId, user.listings ]
+                    return [ result.insertId, user._id, user.listings ]
                 })
             )
 
             compliteCreateUser.then(result => {
                 result.forEach(userListing => {
-                    const [userId, userListings] = userListing
+                    const [id ,userId, userListings] = userListing
                     const createdListings = Promise.all(
                         userListings.map(async (listingId): Promise<number> => {
                             const listing = listings.find(l => l._id === listingId)
@@ -948,7 +945,7 @@ const seed = async (): Promise<void> => {
                     )
 
                     createdListings.then(result => {
-                        updateIntoTable(db, 'users', `listings = '${JSON.stringify(result)}'`, `id = ${userId}`)
+                        updateIntoTable(db, 'users', `listings = '${JSON.stringify(result)}'`, `id = ${id}`)
                     }) 
                 })
             })

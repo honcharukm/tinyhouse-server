@@ -105,7 +105,7 @@ export const ViewerResolvers: IResolvers = {
                 }
 
                 return {
-                    _id: viewer.id,
+                    _id: viewer.userId,
                     token: viewer.token,
                     avatar: viewer.avatar,
                     walletId: viewer.walletId,

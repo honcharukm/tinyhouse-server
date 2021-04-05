@@ -1,6 +1,6 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2'
 import { connect } from '../database.connect'
-import { CreateUser, GetUser, GetUserById, UpdateUser} from '../types'
+import { CreateUser, GetUser, GetUserById, GetUserByToken, UpdateUser} from '../types'
 
 export const getUser: GetUser = async (userId) => {
     const sql = `
@@ -16,6 +16,18 @@ export const getUser: GetUser = async (userId) => {
 export const getUserById: GetUserById = async (id) => {
     const sql = `
         SELECT * FROM users WHERE id = ${id}
+    `
+
+    const db = await connect()
+    const [ result ] = await db.execute<RowDataPacket[]>(sql)
+
+    return result[0]
+}
+
+export const getUserByToken: GetUserByToken = async (userId, token) => {
+    const sql = `
+        SELECT * FROM users WHERE FIND_IN_SET(userId, ${userId}) 
+        AND FIND_IN_SET(token, ${token})
     `
 
     const db = await connect()

@@ -9,6 +9,7 @@ export type GetUser = (id: string) => Promise<IUser | RowDataPacket>
 export type UpdateUser = <TField = {}>(id: string, fields: TField) => Promise<IUser | RowDataPacket | undefined>
 export type CreateUser = (fields: IUser) => Promise<IUser | RowDataPacket>
 export type GetUserById = (id: number) => Promise<IUser | RowDataPacket>
+export type GetUserByToken = (userId: string, token: string | undefined) => Promise<IUser | RowDataPacket>
 
 export interface IDatabase {
     listing: { 
@@ -18,7 +19,8 @@ export interface IDatabase {
     user: {
         getUser: GetUser
         updateUser: UpdateUser
-        createUser: CreateUser
+        createUser: CreateUser,
+        getUserByToken: GetUserByToken
     }
 }
 

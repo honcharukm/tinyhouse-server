@@ -5,11 +5,23 @@ import { Viewer } from '../../../types'
 import { IDatabase, IUser } from '../../../database/types'
 import { LogInArgs } from './types'
 import { RowDataPacket } from 'mysql2'
+import { Response, Request } from 'express'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const cookieOptions = {
+    httpOnly: true,
+    sameSite: true,
+    signed: true,
+    secure: process.env.NODE_ENV === 'development' ? false : true
+}
 
 const logInViaGoogle = async (
     code: string, 
     token: string, 
-    db: IDatabase
+    db: IDatabase,
+    res: Response
 ): Promise<IUser | RowDataPacket> => {
     const { user } = await Google.logIn(code)
     
@@ -73,6 +85,28 @@ const logInViaGoogle = async (
         viewer = createUser
     }
 
+    res.cookie('viewer', userId, {
+        ...cookieOptions
+    })
+
+    return viewer
+}
+
+const logInViaCookie = async (
+    token: string, 
+    db: IDatabase, 
+    req: Request, 
+    res: Response
+): Promise<IUser | RowDataPacket | undefined> => {
+    const viewer = await db.user.updateUser(
+        req.signedCookies.viewer,
+        { token }
+    )
+
+    if (!viewer) {
+        res.clearCookie('viewer', cookieOptions)
+    }
+
     return viewer
 }
 
@@ -90,15 +124,15 @@ export const ViewerResolvers: IResolvers = {
         logIn: async (
             _root: undefined, 
             { input }: LogInArgs, 
-            { database }: { database: IDatabase }
+            { database, res, req }: { database: IDatabase, res: Response, req: Request }
         ): Promise<Viewer> => {
             try {
                 const code = input ? input.code : null
                 const token = crypto.randomBytes(16).toString('hex')
 
                 const viewer: IUser | RowDataPacket | undefined = code 
-                    ? await logInViaGoogle(code, token, database) 
-                    : undefined
+                    ? await logInViaGoogle(code, token, database, res) 
+                    : await logInViaCookie(token, database, req, res)
 
                 if (!viewer) {
                     return { didRequest: true }
@@ -116,8 +150,13 @@ export const ViewerResolvers: IResolvers = {
                 throw new Error(`Failed to log in: ${error}`) 
             } 
         },
-        logOut: (): Viewer => {
+        logOut: (
+            _root: undefined,
+            _args: {},
+            { res }: { res: Response }
+        ): Viewer => {
             try {
+                res.clearCookie('viewer', cookieOptions)
                 return {
                     didRequest: true
                 }

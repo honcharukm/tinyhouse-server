@@ -1,27 +1,12 @@
-import { RowDataPacket, OkPacket } from 'mysql2'
-
-type Collection<TData> = TData[] | RowDataPacket[]
-
-export type GetListings = () => Promise<Collection<IListing>>
-export type DeleteListing = (id: number) => Promise<OkPacket>
-
-export type GetUser = (id: string) => Promise<IUser | RowDataPacket>
-export type UpdateUser = <TField = {}>(id: string, fields: TField) => Promise<IUser | RowDataPacket | undefined>
-export type CreateUser = (fields: IUser) => Promise<IUser | RowDataPacket>
-export type GetUserById = (id: number) => Promise<IUser | RowDataPacket>
-export type GetUserByToken = (userId: string, token: string | undefined) => Promise<IUser | RowDataPacket>
+import { RowDataPacket} from 'mysql2'
+import { DBBooking } from './models/Boooking/types'
+import { DBListing } from './models/Listing/types'
+import { DBUser } from './models/User/types'
 
 export interface IDatabase {
-    listing: { 
-        getListings: GetListings
-        deleteListing: DeleteListing
-    },
-    user: {
-        getUser: GetUser
-        updateUser: UpdateUser
-        createUser: CreateUser,
-        getUserByToken: GetUserByToken
-    }
+    listing: DBListing,
+    user: DBUser
+    booking: DBBooking
 }
 
 export enum ListingType {
@@ -41,7 +26,7 @@ export interface BookingsIndex {
     [key: string]: BookingsIndexYear
 }
 
-export interface IListing {
+export interface IListing extends RowDataPacket {
     id: number
     title: string
     description: string
@@ -58,7 +43,7 @@ export interface IListing {
     numOfGuests: number
 }
 
-export interface IUser {
+export interface IUser extends RowDataPacket {
     id?: number
     userId: string
     token: string
@@ -69,9 +54,10 @@ export interface IUser {
     income: number
     bookings: string
     listings: string
+    authorized?: boolean
 }
 
-export interface IBooking {
+export interface IBooking extends RowDataPacket {
     id: number
     listing: number
     tenant: string

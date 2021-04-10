@@ -1,37 +1,29 @@
-import { ResultSetHeader, RowDataPacket } from 'mysql2'
-import { connect } from '../database.connect'
-import { CreateUser, GetUser, GetUserById, GetUserByToken, UpdateUser} from '../types'
+import { ResultSetHeader } from 'mysql2'
+import { connect } from '../../database.connect'
+import { IUser } from '../../types'
+import { CreateUser, GetUser, GetUserByToken, UpdateUser} from './types'
 
-export const getUser: GetUser = async (userId) => {
-    const sql = `
-        SELECT * FROM users WHERE FIND_IN_SET(userId, '${userId}')
-    `
-
-    const db = await connect()
-    const [ result ] = await db.execute<RowDataPacket[]>(sql)
-
-    return result[0]
-}
-
-export const getUserById: GetUserById = async (id) => {
-    const sql = `
-        SELECT * FROM users WHERE id = ${id}
-    `
+export const getUser: GetUser = async (id) => {
+    const whereId = typeof(id) === 'string' 
+        ? `userId = '${id}'`
+        : `id = ${id}`
+        
+    const sql = `SELECT * FROM \`users\` WHERE ${whereId}`
 
     const db = await connect()
-    const [ result ] = await db.execute<RowDataPacket[]>(sql)
+    const [ result ] = await db.execute<IUser[]>(sql)
 
     return result[0]
 }
 
 export const getUserByToken: GetUserByToken = async (userId, token) => {
     const sql = `
-        SELECT * FROM users WHERE FIND_IN_SET(userId, ${userId}) 
-        AND FIND_IN_SET(token, ${token})
+        SELECT * FROM \`users\` 
+        WHERE token = '${token}' AND userId = '${userId}'
     `
 
     const db = await connect()
-    const [ result ] = await db.execute<RowDataPacket[]>(sql)
+    const [ result ] = await db.execute<IUser[]>(sql)
 
     return result[0]
 }
@@ -67,7 +59,7 @@ export const createUser: CreateUser = async (fields) => {
     const [ result ] = await db.execute<ResultSetHeader>(sql, Object.values(fields))
 
     if (result.affectedRows > 0) {
-        return await getUserById(result.insertId)
+        return await getUser(result.insertId)
     } else {
         throw new Error('Failed to create user')
     }

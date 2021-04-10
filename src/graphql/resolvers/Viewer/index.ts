@@ -79,7 +79,7 @@ const logInViaGoogle = async (
             income: 0,
             name: userName,
             bookings: JSON.stringify([]),
-            listings: JSON.stringify([])
+            listings: JSON.stringify([]),
         })
 
         viewer = createUser

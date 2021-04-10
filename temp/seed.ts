@@ -30,7 +30,7 @@ const tables: Table[] = [
             'walletId varchar(255)',
             'income int',
             'bookings text',
-            'listings json'
+            'listings text'
         ]
     },
     {

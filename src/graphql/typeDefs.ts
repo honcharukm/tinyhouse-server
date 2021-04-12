@@ -25,7 +25,7 @@ export const typeDefs = gql`
         type: ListingType
         address: String!
         city: String!
-        bookings(limit: Int!, page: Int!): Booking
+        bookings(limit: Int!, page: Int!): Bookings
         bookingsIndex: String!
         price: Int!
         numOfGuests: Int!
@@ -59,6 +59,7 @@ export const typeDefs = gql`
     type Query {
         authUrl: String!
         user(id: String!): User!
+        listing(id: String!): Listing!
     }
 
     type Mutation {

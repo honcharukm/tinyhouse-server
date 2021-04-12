@@ -10,6 +10,10 @@ export type GetListings = (
     page?: number
 ) => Promise<ResultGetListings>
 
+export type GetListing = (id: string) => Promise<IListing>
+
 export interface DBListing {
     getListings: GetListings
+    getListing: GetListing
 }
+

@@ -37,10 +37,11 @@ export interface IListing extends RowDataPacket {
     country: string
     admin: string
     city: string
-    bookings: number[]
+    bookings: string
     bookingsIndex: BookingsIndex
     price: number
     numOfGuests: number
+    authorized?: boolean
 }
 
 export interface IUser extends RowDataPacket {

@@ -1,5 +1,5 @@
 import { connect } from '../../database.connect'
-import { GetListings} from './types'
+import { GetListing, GetListings} from './types'
 import { RowDataPacket } from 'mysql2'
 import { IListing } from '../../types'
 
@@ -38,4 +38,15 @@ export const getListings: GetListings = async (
         total: total[0]['COUNT(*)'],
         result
     }
+}
+
+export const getListing: GetListing = async (id) => {
+    const sql = `
+        SELECT * FROM \`listings\` WHERE id = ${id}
+    `
+
+    const db = await connect()
+    const [ result ] = await db.execute<IListing[]>(sql)
+
+    return result[0]
 }

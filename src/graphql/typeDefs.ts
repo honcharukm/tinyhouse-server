@@ -36,6 +36,7 @@ export const typeDefs = gql`
     }
     type User {
         id: String!
+        userId: String!
         name: String!
         avatar: String!
         contact: String!

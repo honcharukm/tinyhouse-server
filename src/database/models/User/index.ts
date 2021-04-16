@@ -2,29 +2,21 @@ import { ResultSetHeader } from 'mysql2'
 import { connect } from '../../database.connect'
 import { IUser } from '../../types'
 import { CreateUser, GetUser, GetUserByToken, UpdateUser} from './types'
+import { select } from '../../database.select'
 
 export const getUser: GetUser = async (id) => {
     const whereId = typeof(id) === 'string' 
         ? `userId = '${id}'`
         : `id = ${id}`
         
-    const sql = `SELECT * FROM \`users\` WHERE ${whereId}`
-
-    const db = await connect()
-    const [ result ] = await db.execute<IUser[]>(sql)
-
+    const result = await select<IUser[]>('users', undefined, whereId)
     return result[0]
 }
 
 export const getUserByToken: GetUserByToken = async (userId, token) => {
-    const sql = `
-        SELECT * FROM \`users\` 
-        WHERE token = '${token}' AND userId = '${userId}'
-    `
+    const where = `token = '${token}' AND userId = '${userId}'`
 
-    const db = await connect()
-    const [ result ] = await db.execute<IUser[]>(sql)
-
+    const result = await select<IUser[]>('users', undefined, where)
     return result[0]
 }
 

@@ -1,9 +1,9 @@
-import { connect } from '../../database.connect'
-import { GetListing, GetListings} from './types'
-import { RowDataPacket } from 'mysql2'
+import { select } from '../../database.select'
+import { count } from '../../database.count'
+import { GetListing, GetListings, GetListingsByUser} from './types'
 import { IListing } from '../../types'
 
-export const getListings: GetListings = async (
+export const getListingsByUser: GetListingsByUser = async (
     listingsId, 
     limit = 3,
     page = 1 
@@ -15,38 +15,40 @@ export const getListings: GetListings = async (
         }
     }
 
-    const db = await connect()
+    const listingsIdString = listingsId.join(', ')
 
-    const sqlTotal = `
-        SELECT COUNT(*) 
-        FROM listings 
-        WHERE id IN (${listingsId.join(', ')})
-    `
+    const totalListings = await count('listings', `id IN (${listingsIdString})`)
 
-    const [ total ] = await db.execute<RowDataPacket[]>(sqlTotal)
-
-    const sqlListings = `
-        SELECT * 
-        FROM \`listings\`
-        WHERE id IN (${listingsId.join(', ')})
-        LIMIT ${ page > 0 ? (page - 1) * limit : 0 }, ${limit}
-    `
-
-    const [ result ] = await db.execute<IListing[]>(sqlListings)
+    const result = await select<IListing[]>(
+        'listings', 
+        undefined, 
+        `id IN (${listingsIdString})`, 
+        undefined,
+        limit,
+        page 
+    )
 
     return {
-        total: total[0]['COUNT(*)'],
+        total: totalListings,
         result
     }
 }
 
 export const getListing: GetListing = async (id) => {
-    const sql = `
-        SELECT * FROM \`listings\` WHERE id = ${id}
-    `
-
-    const db = await connect()
-    const [ result ] = await db.execute<IListing[]>(sql)
-
+    const result = await select<IListing[]>('listings', undefined, `id = ${id}`)
     return result[0]
+}
+
+export const getListings: GetListings = async (where, orderBy, limit = 3, page = 1) => {
+    try {
+        const totalListings = await count('listings', where)
+        const listings = await select<IListing[]>('listings', undefined, where, orderBy, limit, page)
+
+        return {
+            total: totalListings,
+            result: listings
+        }
+    } catch (e) {
+        throw new Error(`Failed to get liistings: ${e}`)
+    }
 }

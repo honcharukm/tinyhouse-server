@@ -4,7 +4,7 @@ export interface ResultGetListings {
     total: number,
     result: IListing[]
 }
-export type GetListings = (
+export type GetListingsByUser = (
     listingsId: number[],
     limit?: number,
     page?: number
@@ -12,8 +12,16 @@ export type GetListings = (
 
 export type GetListing = (id: string) => Promise<IListing>
 
+export type GetListings = (
+    where?: string,
+    orderBy?: string,
+    limit?: number,
+    page?: number 
+) => Promise<ResultGetListings>
+
 export interface DBListing {
-    getListings: GetListings
+    getListingsByUser: GetListingsByUser
     getListing: GetListing
+    getListings: GetListings
 }
 

@@ -1,7 +1,7 @@
-import { OkPacket } from 'mysql2'
-import { connect } from '../../database.connect'
 import { IBooking } from '../../types'
 import { GetBookings } from './types'
+import { count } from '../../database.count'
+import { select } from '../../database.select'
 
 export const getBookings: GetBookings = async (
     bookingsId, 
@@ -15,27 +15,22 @@ export const getBookings: GetBookings = async (
         }
     }
 
-    const db = await connect()
+    const bookingsIdString = bookingsId.join(', ')
+    const where = `id IN (${bookingsIdString})`
 
-    const sqlTotal = `
-        SELECT COUNT(*) 
-        FROM bookings 
-        WHERE id IN (${bookingsId.join(', ')})
-    `
+    const total = await count('bookings', where)
 
-    const [ total ] = await db.execute<OkPacket>(sqlTotal)
-
-    const sqlBookings = `
-        SELECT * 
-        FROM bookings
-        WHERE id IN (${bookingsId.join(', ')})
-        LIMIT ${ page > 0 ? (page - 1) * limit : 0 }, ${limit}
-    `
-
-    const [ result ] = await db.execute<IBooking[]>(sqlBookings)
+    const result = await select<IBooking[]>(
+        'bookings',
+        undefined,
+        where,
+        undefined,
+        limit,
+        page
+    )
 
     return {
-        total: total.fieldCount,
+        total: total,
         result
     }
 }

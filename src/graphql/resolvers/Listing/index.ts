@@ -3,7 +3,10 @@ import { IDatabase, IListing, IUser } from '../../../database/types'
 import { 
     ListingArgs,
     ListingBookingsArgs,
-    ListingBookingsData
+    ListingBookingsData,
+    ListingsArgs,
+    ListingsData,
+    ListingsFilters
 } from './types'
 import { authorize } from '../../../utils/'
 import { Request } from 'express'
@@ -30,6 +33,29 @@ export const ListingResolvers: IResolvers ={
                 return listing
             } catch (e) {
                 throw new Error(`Failed to query listing: ${e}`)
+            }
+        },
+        listings: async (
+            _root: undefined,
+            { filter, limit, page }: ListingsArgs,
+            { database }: { database: IDatabase }
+        ): Promise<ListingsData> => {
+            try {
+                let order
+
+                if (filter && filter === ListingsFilters.PRICE_HIGH_TO_LOW) {
+                    order = 'price DESC'
+                }
+
+                if (filter && filter === ListingsFilters.PRICE_LOW_TO_HIGH) {
+                    order = 'price ASC'
+                }
+
+                const listings = database.listing.getListings(undefined, order, limit, page)
+
+                return listings
+            } catch (e) {
+                throw new Error(`Failed to query listings: ${e}`)
             }
         }
     },

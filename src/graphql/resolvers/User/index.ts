@@ -62,7 +62,7 @@ export const UserResolvers: IResolvers = {
           ): Promise<UserListingsData | null> => {
             try {
                 const listingsId = JSON.parse(user.listings)
-                const listings = await database.listing.getListings(listingsId, limit, page)
+                const listings = await database.listing.getListingsByUser(listingsId, limit, page)
                 
                 return listings
             } catch (error) {
